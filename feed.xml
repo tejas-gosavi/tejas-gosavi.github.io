@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/</link><description>Recent content on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/feed.xml" rel="self" type="application/rss+xml"/><item><title>Hello World</title><link>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</link><pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</guid><description>&lt;p>So here&amp;rsquo;s how this blog came to exist&amp;hellip;&lt;/p>
+
+
+
+
+&lt;h2 id="the-go-connection-link">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/#the-go-connection-link">The Go Connection &amp;#x1f517;&lt;/a>
+&lt;/h2>
+&lt;p>I&amp;rsquo;ve been wanting to dive deeper into Go for a while now. As someone who works primarily with JavaScript and other languages, Go&amp;rsquo;s simplicity and performance always intrigued me. But you know how it is - work keeps you busy, and personal learning projects keep getting pushed to &amp;ldquo;someday.&amp;rdquo;&lt;/p>
+&lt;p>Then I stumbled upon Hugo while researching static site generators. Wait, Hugo is built with Go? And I needed a personal site anyway? Perfect excuse to start somewhere!&lt;/p>
+
+
+
+
+&lt;h2 id="why-hugo-rocket">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/#why-hugo-rocket">Why Hugo? &amp;#x1f680;&lt;/a>
+&lt;/h2>
+&lt;p>Sure, learning Hugo won&amp;rsquo;t teach me Go programming directly, but it felt like a good entry point into the Go ecosystem. Plus, I wanted to build something tangible while exploring new territory.&lt;/p>
+&lt;p>After some digging around (and probably way too much time comparing static site generators), Hugo just clicked. Fast builds, simple structure, and hey - it&amp;rsquo;s Go under the hood.&lt;/p>
+
+
+
+
+&lt;h2 id="the-learning-loop-arrows_counterclockwise">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/#the-learning-loop-arrows_counterclockwise">The Learning Loop &amp;#x1f504;&lt;/a>
+&lt;/h2>
+&lt;p>Here&amp;rsquo;s my theory: the best way to truly understand something is to explain it to others. It&amp;rsquo;s like rubber duck debugging, but with an audience.&lt;/p>
+&lt;p>As developers, if we want to become experts in our field, we need to practice articulating our knowledge. So this blog is my experiment in learning by teaching.&lt;/p>
+
+
+
+
+&lt;h2 id="whats-coming-memo">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/#whats-coming-memo">What&amp;rsquo;s Coming &amp;#x1f4dd;&lt;/a>
+&lt;/h2>
+&lt;p>I&amp;rsquo;ll be sharing what I learn here - partly to help others, but mostly to solidify my own understanding. Expect posts about discoveries, experiments, and probably a few &amp;ldquo;I spent 3 hours debugging this stupid thing&amp;rdquo; stories.&lt;/p>
+&lt;p>Fair warning: my English isn&amp;rsquo;t perfect, and I might lack some knowledge or be wrong sometimes. But you don&amp;rsquo;t go from 0 to 1 in one go, right? This is all part of the learning process.&lt;/p>
+&lt;p>Let&amp;rsquo;s see where this journey goes!&lt;/p>
+&lt;p>&lt;em>Thanks for reading! Something is cooking and I&amp;rsquo;ll present it ASAP. Stay tuned! &amp;#x1f680;&lt;/em>&lt;/p></description></item></channel></rss>
