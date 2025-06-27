@@ -1,4 +1,210 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Hello World</title><link>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</link><pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</guid><description>&lt;p>So here&amp;rsquo;s how this blog came to exist&amp;hellip;&lt;/p>
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Thu, 26 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Why I Obsessed Over JavaScript Generators</title><link>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</link><pubDate>Thu, 26 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</guid><description>&lt;p>So here&amp;rsquo;s how my obsession with JavaScript generators started&amp;hellip;&lt;/p>
+&lt;p>A few days back, I was working on a task where I had to write a data-fix/migration script. At first, it looked easy and ran well for a few users, but then we had to run it for all users. That&amp;rsquo;s when it started taking more time and causing memory and CPU issues, as it had to fetch all users&amp;rsquo; data and store it while processing.&lt;/p>
+&lt;p>I understood that to handle this efficiently, we needed to process data in batches. We considered a database-level approach using cursors, but after studying them more, I found out that they can also cause performance issues. I started searching for better approaches, and that&amp;rsquo;s when I discovered a solution with generators.&lt;/p>
+&lt;p>So, enough of the past. Let&amp;rsquo;s focus on the present.&lt;/p>
+
+
+
+
+&lt;h2 id="understanding-the-foundations">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#understanding-the-foundations">Understanding the Foundations&lt;/a>
+&lt;/h2>
+&lt;p>Before diving into generators, we need to understand a few concepts like &lt;strong>iterator&lt;/strong> and &lt;strong>iterable&lt;/strong>. Let&amp;rsquo;s get started.&lt;/p>
+
+
+
+
+&lt;h3 id="what-are-iterators">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#what-are-iterators">What are Iterators?&lt;/a>
+&lt;/h3>
+&lt;p>Simple definition: any object that follows the iterator protocol. This means any object which has a method called &lt;code>next()&lt;/code> that returns an object containing two keys named &lt;code>value&lt;/code> and &lt;code>done&lt;/code>.&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>value&lt;/code> refers to the current value for the corresponding iteration&lt;/li>
+&lt;li>&lt;code>done&lt;/code> indicates whether the iteration is finished or not&lt;/li>
+&lt;/ul>
+&lt;p>Here&amp;rsquo;s an example:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">getUsers&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl"> &lt;span class="nx">index&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl"> &lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">users&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;Tejas&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Omkar&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Yash&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Manthan&amp;#34;&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl"> &lt;span class="nx">value&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">users&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">at&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">index&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl"> &lt;span class="nx">done&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">index&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="nx">users&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">length&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Tejas&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Omkar&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Yash&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Manthan&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: undefined, done: true}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl">&lt;span class="c1">// ... this still continues if called
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsers&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: undefined, done: true}
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>In the above snippet, you can see we&amp;rsquo;re indicating that iteration ends when the index is out of array bounds using the &lt;code>done&lt;/code> key, but we&amp;rsquo;re still able to call the &lt;code>next()&lt;/code> method. There&amp;rsquo;s no automatic termination here.&lt;/p>
+&lt;p>By the way, we can also have an infinite iterator like this:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">iAmInfinity&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl"> &lt;span class="nx">index&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl"> &lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl"> &lt;span class="nx">value&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">index&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl"> &lt;span class="nx">done&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="kc">false&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">&lt;span class="nx">iAmInfinity&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: 0, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">iAmInfinity&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: 1, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">iAmInfinity&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: 2, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">iAmInfinity&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: 3, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">iAmInfinity&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: 4, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl">&lt;span class="c1">// ... continues indefinitely
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>So, this is the iterator protocol. Not exciting, right? Same as functions and closures? But bear with me for the next 10 minutes—you&amp;rsquo;ll understand what I&amp;rsquo;m getting at.&lt;/p>
+
+
+
+
+&lt;h3 id="what-are-iterables">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#what-are-iterables">What are Iterables?&lt;/a>
+&lt;/h3>
+&lt;p>Again, simple definition: any object that follows the iterable protocol. This means any object which has a method called &lt;code>[Symbol.iterator]()&lt;/code> that returns an iterator.&lt;/p>
+&lt;p>Here&amp;rsquo;s an example:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">getUsers&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl"> &lt;span class="p">[&lt;/span>&lt;span class="nx">Symbol&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">iterator&lt;/span>&lt;span class="p">]()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl"> &lt;span class="nx">index&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl"> &lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">users&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;Tejas&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Omkar&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Yash&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Manthan&amp;#34;&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl"> &lt;span class="nx">value&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">users&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">at&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">index&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl"> &lt;span class="nx">done&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="k">this&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">index&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="nx">users&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">length&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl">&lt;span class="p">};&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>Now you might ask: what&amp;rsquo;s the difference? Just some weird syntax change? But wait a minute&amp;hellip;&lt;/p>
+&lt;p>You know what &lt;code>for...of&lt;/code> takes as input to loop over? That&amp;rsquo;s right—an iterable!&lt;/p>
+&lt;p>So you can do the following with a custom-defined iterable:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln">1&lt;/span>&lt;span class="cl">&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kr">const&lt;/span> &lt;span class="nx">user&lt;/span> &lt;span class="k">of&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">2&lt;/span>&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">user&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// &amp;#34;Tejas&amp;#34;, &amp;#34;Omkar&amp;#34;, &amp;#34;Yash&amp;#34;, &amp;#34;Manthan&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">3&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>And since we can do similar things with arrays, objects, etc., this means I can also destructure it like:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln">1&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="nx">u1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">u2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">...&lt;/span>&lt;span class="nx">others&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">2&lt;/span>&lt;span class="cl">&lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">u1&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// &amp;#34;Tejas&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">3&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">u2&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// &amp;#34;Omkar&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">4&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">others&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// [&amp;#39;Yash&amp;#39;, &amp;#39;Manthan&amp;#39;]
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+
+
+
+
+&lt;h2 id="enter-generators">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#enter-generators">Enter Generators&lt;/a>
+&lt;/h2>
+&lt;p>Now generators enter the scene. They are similar to iterators and iterables but with cleaner syntax.&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="kd">function&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl"> &lt;span class="k">yield&lt;/span> &lt;span class="s2">&amp;#34;Tejas&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl"> &lt;span class="k">yield&lt;/span> &lt;span class="s2">&amp;#34;Omkar&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl"> &lt;span class="k">yield&lt;/span> &lt;span class="s2">&amp;#34;Yash&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl"> &lt;span class="k">yield&lt;/span> &lt;span class="s2">&amp;#34;Manthan&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">getUsersGenerator&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Tejas&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Omkar&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Yash&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: &amp;#39;Manthan&amp;#39;, done: false}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: undefined, done: true}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl">&lt;span class="c1">// ... this continues if called
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">getUsersGenerator&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">next&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1">// {value: undefined, done: true}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl">&lt;span class="c1">// We can also use them in for..of
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kr">const&lt;/span> &lt;span class="nx">user&lt;/span> &lt;span class="k">of&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">user&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// &amp;#34;Tejas&amp;#34;, &amp;#34;Omkar&amp;#34;, &amp;#34;Yash&amp;#34;, &amp;#34;Manthan&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>As you can see, it&amp;rsquo;s the same as a normal function but with a &lt;code>*&lt;/code> at the end of the &lt;code>function&lt;/code> keyword, which acts as an identifier for generator functions. We also see a keyword called &lt;code>yield&lt;/code> which acts as the return value for the current iteration. Using &lt;code>yield&lt;/code>, we can start and pause our processing/execution.&lt;/p>
+&lt;p>Normal functions run from start to end, but using &lt;code>yield&lt;/code> we can pause the function and restart its execution from the paused step. It continues working until it reaches the last &lt;code>yield&lt;/code> statement or &lt;code>return&lt;/code> statement.&lt;/p>
+
+
+
+
+&lt;h2 id="async-generators-the-real-magic">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#async-generators-the-real-magic">Async Generators: The Real Magic&lt;/a>
+&lt;/h2>
+&lt;p>There are also &lt;strong>Asynchronous Generators&lt;/strong> which handle async processing, and here&amp;rsquo;s how I used them to solve my use case:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-js" data-lang="js">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="kr">async&lt;/span> &lt;span class="kd">function&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="nx">getUsersInBatch&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">batchSize&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">10&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">usersCount&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kr">await&lt;/span> &lt;span class="nx">getAllUsersCount&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">totalBatches&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">Math&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ceil&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">usersCount&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="nx">batchSize&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kd">let&lt;/span> &lt;span class="nx">batchNumber&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">batchNumber&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="nx">totalBatches&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">batchNumber&lt;/span>&lt;span class="o">++&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">offset&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">batchNumber&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="nx">batchSize&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">limit&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">Math&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">batchSize&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">usersCount&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="nx">offset&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">usersBatch&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kr">await&lt;/span> &lt;span class="nx">getUsers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">limit&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">offset&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl"> 
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl"> &lt;span class="k">yield&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl"> &lt;span class="nx">usersBatch&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl"> &lt;span class="nx">batchNumber&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="nx">batchNumber&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl"> &lt;span class="nx">totalBatches&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl"> &lt;span class="p">};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl">&lt;span class="c1">// Usage
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">for&lt;/span> &lt;span class="kr">await&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kr">const&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">usersBatch&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">batchNumber&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">totalBatches&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="k">of&lt;/span> &lt;span class="nx">getUsersInBatch&lt;/span>&lt;span class="p">())&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl"> &lt;span class="kr">await&lt;/span> &lt;span class="nx">performDataFixForUsers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">usersBatch&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// some function for processing
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">22&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sb">`Completed &lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nx">batchNumber&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="sb">/&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nx">totalBatches&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="sb"> batches`&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">23&lt;/span>&lt;span class="cl">&lt;span class="p">}&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;p>This might look like a lot to digest, but let me explain how it works step by step:&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Initialize the generator&lt;/strong>: We call &lt;code>getUsersInBatch()&lt;/code>, which returns a generator object&lt;/li>
+&lt;li>&lt;strong>Calculate batches&lt;/strong>: We first get the total count of users to determine batch count, then calculate the actual number of batches needed to fetch all users&lt;/li>
+&lt;li>&lt;strong>Process in batches&lt;/strong>: We use a loop to fetch users with &lt;code>limit&lt;/code> and &lt;code>offset&lt;/code>, and after fetching every batch, we &lt;code>yield&lt;/code> that batch&lt;/li>
+&lt;li>&lt;strong>Pause and resume&lt;/strong>: The &lt;code>yield&lt;/code> statement is inside a &lt;code>for&lt;/code> loop, which means this function continues working until all batches are completed (all users are fetched)&lt;/li>
+&lt;/ol>
+&lt;p>Here&amp;rsquo;s the beautiful part: we pause execution after fetching every batch and give that batch to a function for processing only that particular batch. Once processing is finished, we restart execution—the &lt;code>batchNumber&lt;/code> is incremented and we fetch a new batch based on the new &lt;code>limit&lt;/code> and &lt;code>offset&lt;/code>.&lt;/p>
+&lt;p>Also, this generator function is generic, meaning we can use it in multiple use cases where we need to fetch users in batches and perform some processing on them.&lt;/p>
+
+
+
+
+&lt;h2 id="why-this-approach-won">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/#why-this-approach-won">Why This Approach Won&lt;/a>
+&lt;/h2>
+&lt;p>This solution solved my original problem perfectly:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Memory efficient&lt;/strong>: Only one batch is loaded in memory at a time&lt;/li>
+&lt;li>&lt;strong>Pausable execution&lt;/strong>: Processing can be paused and resumed&lt;/li>
+&lt;li>&lt;strong>Clean code&lt;/strong>: Much more readable than manual pagination logic&lt;/li>
+&lt;li>&lt;strong>Reusable&lt;/strong>: The generator can be used across different scenarios&lt;/li>
+&lt;/ul>
+&lt;p>So yes, that&amp;rsquo;s how I fell in love with generators.&lt;/p>
+&lt;p>See you in next blog post!&lt;/p></description></item><item><title>Hello World</title><link>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</link><pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/my-first-blog-post/</guid><description>&lt;p>So here&amp;rsquo;s how this blog came to exist&amp;hellip;&lt;/p>
 
 
 
