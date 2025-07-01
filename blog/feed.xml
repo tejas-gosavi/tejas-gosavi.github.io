@@ -1,4 +1,213 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Thu, 26 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Why I Obsessed Over JavaScript Generators</title><link>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</link><pubDate>Thu, 26 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</guid><description>&lt;p>So here&amp;rsquo;s how my obsession with JavaScript generators started&amp;hellip;&lt;/p>
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Tue, 01 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Anatomy of Hexagonal Architecture - Part 1</title><link>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</link><pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</guid><description>&lt;p>So here&amp;rsquo;s how I discovered hexagonal architecture&amp;hellip;&lt;/p>
+&lt;p>A few days ago, my senior manager was discussing the code structure of a repository, and that&amp;rsquo;s where he mentioned it. I was immediately impressed by the name &amp;ldquo;Hexagonal Architecture&amp;rdquo; and instantly became a fan of it. Later, I wanted to learn more about it, so I started researching online. There are many articles and videos available, but they were quite confusing to me at first, so I stopped searching.&lt;/p>
+&lt;p>A few days later, I was reading about clean architecture and then explored how we can transition from clean to hexagonal architecture. That&amp;rsquo;s when I gained a better understanding of it.&lt;/p>
+&lt;p>So, enough about the past—let&amp;rsquo;s focus on the present.&lt;/p>
+
+
+
+
+&lt;h2 id="what-this-series-will-cover">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#what-this-series-will-cover">What This Series Will Cover&lt;/a>
+&lt;/h2>
+&lt;p>This will be a multi-part blog series where I&amp;rsquo;ll be designing and coding a Todoist application using hexagonal architecture. Through this practical approach, we will understand how to create a system that:&lt;/p>
+&lt;ul>
+&lt;li>Follows &lt;strong>reusability&lt;/strong> and &lt;strong>dependency injection&lt;/strong> principles&lt;/li>
+&lt;li>Remains &lt;strong>framework-agnostic&lt;/strong>&lt;/li>
+&lt;li>Makes &lt;strong>testing&lt;/strong> much easier and more effective&lt;/li>
+&lt;li>Significantly improves &lt;strong>developer experience (DX)&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>Let me also mention that initially, this architecture might seem confusing and complex (which it is), and it&amp;rsquo;s not suitable for smaller projects. However, as you gain more hands-on experience with it, it becomes clearer and simpler to work with.&lt;/p>
+
+
+
+
+&lt;h2 id="understanding-the-foundations">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#understanding-the-foundations">Understanding the Foundations&lt;/a>
+&lt;/h2>
+&lt;p>Hexagonal architecture was proposed by &lt;strong>Alistair Cockburn&lt;/strong> to efficiently manage applications. It is also known as the &lt;strong>Ports and Adapters Pattern&lt;/strong>.&lt;/p>
+&lt;p>The core principle is to isolate the business logic from external concerns by creating clear boundaries through ports and adapters. This allows the application core to remain independent of frameworks, databases, UI, and other external systems.&lt;/p>
+&lt;p>&lt;img src="https://Tejas-Gosavi.github.io/images/blog/hexagonal-architecture.png" alt="Hexagonal Architecture">&lt;/p>
+&lt;p>As you can see in the above diagram, this is the main design. Looks complex, right? Bear with me—you&amp;rsquo;ll understand it step by step.&lt;/p>
+
+
+
+
+&lt;h3 id="the-two-sides-of-the-hexagon">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#the-two-sides-of-the-hexagon">The Two Sides of the Hexagon&lt;/a>
+&lt;/h3>
+&lt;p>The red dotted line in the diagram divides the architecture into two main components:&lt;/p>
+
+
+
+
+&lt;h4 id="1-primary-driving-side">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#1-primary-driving-side">1. Primary (Driving) Side&lt;/a>
+&lt;/h4>
+&lt;p>&lt;strong>Primary Actors&lt;/strong> are actors that drive our code/application or serve as the entry point of our system. They initiate interactions.&lt;/p>
+&lt;p>&lt;strong>Examples:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Web controllers (REST APIs)&lt;/li>
+&lt;li>CLI commands&lt;/li>
+&lt;li>Message queue consumers&lt;/li>
+&lt;li>Scheduled jobs&lt;/li>
+&lt;li>External APIs calling our system&lt;/li>
+&lt;/ul>
+
+
+
+
+&lt;h4 id="2-secondary-driven-side">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#2-secondary-driven-side">2. Secondary (Driven) Side&lt;/a>
+&lt;/h4>
+&lt;p>&lt;strong>Secondary Actors&lt;/strong> are actors that are driven by our application or serve as the exit point of our system. Our application calls them.&lt;/p>
+&lt;p>&lt;strong>Examples:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Databases (PostgreSQL, MongoDB)&lt;/li>
+&lt;li>External APIs we call&lt;/li>
+&lt;li>Cache systems (Redis)&lt;/li>
+&lt;li>Message queues we publish to&lt;/li>
+&lt;li>File systems&lt;/li>
+&lt;li>Email services&lt;/li>
+&lt;/ul>
+
+
+
+
+&lt;h3 id="core-components-explained">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#core-components-explained">Core Components Explained&lt;/a>
+&lt;/h3>
+
+
+
+
+&lt;h4 id="adapters">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#adapters">Adapters&lt;/a>
+&lt;/h4>
+&lt;p>Adapters translate between the external world and our application core:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Primary Adapters&lt;/strong> act like Controllers/Handlers. They receive external requests and translate them into calls to our application core.&lt;/li>
+&lt;li>&lt;strong>Secondary Adapters&lt;/strong> are typically Repositories or Gateways. They implement the interfaces defined by our application and handle communication with external systems.&lt;/li>
+&lt;/ul>
+
+
+
+
+&lt;h4 id="ports">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#ports">Ports&lt;/a>
+&lt;/h4>
+&lt;p>Ports are interfaces that define contracts:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Primary Ports&lt;/strong> define what our application can do (use cases). They are implemented by our services.&lt;/li>
+&lt;li>&lt;strong>Secondary Ports&lt;/strong> define what our application needs from the outside world. They are implemented by secondary adapters.&lt;/li>
+&lt;/ul>
+
+
+
+
+&lt;h4 id="service">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#service">Service&lt;/a>
+&lt;/h4>
+&lt;p>This is where the business logic and use cases reside. It orchestrates the domain logic and coordinates with external systems through ports.&lt;/p>
+
+
+
+
+&lt;h4 id="domain">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#domain">Domain&lt;/a>
+&lt;/h4>
+&lt;p>These are the core entities and business rules of our application. They contain the essential business logic and are completely independent of external concerns.&lt;/p>
+
+
+
+
+&lt;h2 id="a-practical-example-user-profile-flow">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#a-practical-example-user-profile-flow">A Practical Example: User Profile Flow&lt;/a>
+&lt;/h2>
+&lt;p>Let&amp;rsquo;s walk through a concrete example to solidify our understanding. Imagine a frontend application that needs to display user details on a profile page.&lt;/p>
+
+
+
+
+&lt;h3 id="request-flow-inbound">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#request-flow-inbound">Request Flow (Inbound)&lt;/a>
+&lt;/h3>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>1. Frontend makes HTTP GET request to /api/users/profile
+2. HTTP Adapter (Primary) receives the request
+3. Adapter calls UserService through UserServicePort (Primary Port)
+4. UserService processes the business logic
+5. UserService calls UserRepository through UserRepositoryPort (Secondary Port)
+6. UserRepository (Secondary Adapter) queries the database&lt;/code>&lt;/pre>
+
+
+
+
+&lt;h3 id="response-flow-outbound">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#response-flow-outbound">Response Flow (Outbound)&lt;/a>
+&lt;/h3>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>6. Database returns user data to UserRepository
+5. UserRepository returns domain object to UserService
+4. UserService applies any business rules and returns result
+3. UserService returns data through UserServicePort
+2. HTTP Adapter formats response (JSON)
+1. Frontend receives HTTP response with user data&lt;/code>&lt;/pre>
+
+
+
+
+&lt;h3 id="visual-flow">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#visual-flow">Visual Flow&lt;/a>
+&lt;/h3>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>HTTP Request → Primary Adapter → Primary Port → Service 
+ ↓
+HTTP Response ← Primary Adapter ← Primary Port ← Service
+ ↓
+ Secondary Port → Secondary Adapter → Database
+ ↑ ↓
+ Secondary Port ← Secondary Adapter ← Database&lt;/code>&lt;/pre>
+
+
+
+
+&lt;h2 id="key-benefits-of-this-approach">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#key-benefits-of-this-approach">Key Benefits of This Approach&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;strong>Testability&lt;/strong>: Easy to mock ports for isolated unit testing&lt;/li>
+&lt;li>&lt;strong>Flexibility&lt;/strong>: Can swap implementations without changing core logic&lt;/li>
+&lt;li>&lt;strong>Independence&lt;/strong>: Business logic is completely framework-agnostic&lt;/li>
+&lt;li>&lt;strong>Maintainability&lt;/strong>: Clear separation of concerns and dependencies&lt;/li>
+&lt;li>&lt;strong>Scalability&lt;/strong>: Easy to add new adapters for different interfaces&lt;/li>
+&lt;/ol>
+
+
+
+
+&lt;h2 id="whats-coming-next">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#whats-coming-next">What&amp;rsquo;s Coming Next&lt;/a>
+&lt;/h2>
+&lt;p>In the next part of this series, we&amp;rsquo;ll dive into the actual implementation using TypeScript/JavaScript. We&amp;rsquo;ll build a Todoist clone step by step, showing how each component fits together in practice.&lt;/p>
+&lt;p>Stay tuned for hands-on coding where theory meets reality!&lt;/p>
+
+
+
+
+&lt;h2 id="references">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/#references">References&lt;/a>
+&lt;/h2>
+&lt;p>For deeper understanding, I highly recommend these resources:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Blog&lt;/strong>: &lt;a class="Reference-link" href="https://jmgarridopaz.github.io/content/hexagonalarchitecture.html">Ports and Adapters Pattern by Juan Manuel Garrido&lt;/a>&lt;/li>
+&lt;li>&lt;strong>Video Series&lt;/strong>: &lt;a class="Reference-link" href="https://www.youtube.com/playlist?list=PL1msPBH9ZGkhpANkreFA_teOnloVdLuCx">Hexagonal Architecture by Valentina Jemuović&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Why I Obsessed Over JavaScript Generators</title><link>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</link><pubDate>Thu, 26 Jun 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/why-i-obsessed-over-js-generators/</guid><description>&lt;p>So here&amp;rsquo;s how my obsession with JavaScript generators started&amp;hellip;&lt;/p>
 &lt;p>A few days back, I was working on a task where I had to write a data-fix/migration script. At first, it looked easy and ran well for a few users, but then we had to run it for all users. That&amp;rsquo;s when it started taking more time and causing memory and CPU issues, as it had to fetch all users&amp;rsquo; data and store it while processing.&lt;/p>
 &lt;p>I understood that to handle this efficiently, we needed to process data in batches. We considered a database-level approach using cursors, but after studying them more, I found out that they can also cause performance issues. I started searching for better approaches, and that&amp;rsquo;s when I discovered a solution with generators.&lt;/p>
 &lt;p>So, enough of the past. Let&amp;rsquo;s focus on the present.&lt;/p>
