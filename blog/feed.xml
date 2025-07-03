@@ -1,4 +1,328 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Tue, 01 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Anatomy of Hexagonal Architecture - Part 1</title><link>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</link><pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</guid><description>&lt;p>So here&amp;rsquo;s how I discovered hexagonal architecture&amp;hellip;&lt;/p>
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="https://Tejas-Gosavi.github.io/xml/base.min.xml"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Tejas Gosavi</title><link>https://Tejas-Gosavi.github.io/blog/</link><description>Recent content in Blogs on Tejas Gosavi</description><generator>Hugo</generator><language>en-US</language><lastBuildDate>Thu, 03 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://Tejas-Gosavi.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/><item><title>Anatomy of Hexagonal Architecture - Part 2</title><link>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/</link><pubDate>Thu, 03 Jul 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/</guid><description>&lt;p>As mentioned in the previous blog post, we&amp;rsquo;ll now start with the actual implementation.&lt;/p>
+&lt;p>Just as the construction of a home starts with its foundation, we&amp;rsquo;re going to begin by designing the base of our application - the Domain/Core layer by defining entities for our app.&lt;/p>
+&lt;p>To understand the entities of our app, we first need to understand the features of our application and what it does.&lt;/p>
+&lt;p>Todoist has many capabilities, but for learning purposes, we&amp;rsquo;ll focus on just a few core features:&lt;/p>
+&lt;ul>
+&lt;li>A &lt;strong>User&lt;/strong> owns many &lt;strong>Projects&lt;/strong>&lt;/li>
+&lt;li>A &lt;strong>Project&lt;/strong> has many &lt;strong>Tasks&lt;/strong>&lt;/li>
+&lt;li>A &lt;strong>User&lt;/strong> can create many &lt;strong>Tasks&lt;/strong> under a &lt;strong>Project&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>From these requirements, we can define the entities of our app:&lt;/p>
+&lt;ul>
+&lt;li>User&lt;/li>
+&lt;li>Project&lt;/li>
+&lt;li>Task&lt;/li>
+&lt;/ul>
+&lt;p>Let&amp;rsquo;s define the properties of these entities:&lt;/p>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>User -
+ id -&amp;gt; UUID // Will act as userId
+ name -&amp;gt; string // name of user
+ email -&amp;gt; string // email of user
+ createdAt -&amp;gt; Date // user creation date-time
+ updatedAt -&amp;gt; Date // user updation date-time
+
+Project -
+ id -&amp;gt; UUID // Will act as projectId 
+ title -&amp;gt; string // title of project
+ color -&amp;gt; string // color associated with that project, will act as identifier
+ createdBy -&amp;gt; UUID // Creator of project
+ createdAt -&amp;gt; Date // project creation date-time
+ updatedAt -&amp;gt; Date // project updation date-time
+
+Task -
+ id -&amp;gt; UUID // Will act as taskId
+ title -&amp;gt; string // title of task
+ description -&amp;gt; string // description of task
+ projectId -&amp;gt; UUID // projectId under which this task is created
+ createdBy -&amp;gt; UUID // Owner/Creator of task
+ dueDate -&amp;gt; Date? // Optional property, due date by which this task should be completed
+ priority -&amp;gt; 1 | 2 | 3 | 4 // Priority of the task, lower number = higher priority
+ isCompleted -&amp;gt; boolean // is given task completed or not
+ createdAt -&amp;gt; Date // task creation date-time
+ updatedAt -&amp;gt; Date // task updation date-time&lt;/code>&lt;/pre>
+&lt;p>Great! Our entity definition is complete. Now we need to translate this logic into readable code.&lt;/p>
+&lt;p>Before we start coding, let&amp;rsquo;s prepare our arsenal - tools, project initialization, folder structure, etc.&lt;/p>
+
+
+
+
+&lt;h2 id="tools">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#tools">Tools&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="Reference-link" href="https://bun.sh/">Bun&lt;/a> - will be our runtime&lt;/li>
+&lt;li>&lt;a class="Reference-link" href="https://supabase.com/">Supabase&lt;/a> - will be our database&lt;/li>
+&lt;li>&lt;a class="Reference-link" href="https://orm.drizzle.team/">Drizzle&lt;/a> - will be our ORM (Object Relational Mapping) tool&lt;/li>
+&lt;li>&lt;a class="Reference-link" href="https://zod.dev/">Zod&lt;/a> - will be our validator&lt;/li>
+&lt;/ul>
+
+
+
+
+&lt;h2 id="project-setup">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#project-setup">Project Setup&lt;/a>
+&lt;/h2>
+&lt;p>Run the following commands to initialize the project and create the initial folder structure:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a blank project with bun having name mytodoist&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">bun init mytodoist
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> mytodoist
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># create required files/folders&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">touch .env
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mkdir adapters cmd core infrastructure migrations
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mkdir core/domain
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> core/domain
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">touch users.domain.ts projects.domain.ts tasks.domain.ts
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Install initial packages&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">bun add drizzle-orm postgres dotenv zod
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">bun add -D drizzle-kit tsx&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+
+
+
+
+&lt;h2 id="domain-entity-implementation">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#domain-entity-implementation">Domain Entity Implementation&lt;/a>
+&lt;/h2>
+&lt;p>Now we&amp;rsquo;ll define our domain entities:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="c1">// users.domain.ts
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">varchar&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">uuid&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">timestamp&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;drizzle-orm/pg-core&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="nx">z&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;zod&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="c1">// Domain Model
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">UserModelSchema&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kt">object&lt;/span>&lt;span class="p">({&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl"> &lt;span class="nx">name&lt;/span>: &lt;span class="kt">z&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Name is required&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">255&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Name must be less than 255 characters&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl"> &lt;span class="nx">email&lt;/span>: &lt;span class="kt">z&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">email&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Invalid email format&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">255&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Email must be less than 255 characters&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">optional&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">22&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="nx">UserModel&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">infer&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">typeof&lt;/span> &lt;span class="na">UserModelSchema&lt;/span>&lt;span class="p">&amp;gt;;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">23&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">24&lt;/span>&lt;span class="cl">&lt;span class="c1">// Database Table Definition
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">25&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">26&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">UsersTable&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;users&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">27&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;id&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">primaryKey&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">defaultRandom&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">28&lt;/span>&lt;span class="cl"> &lt;span class="nx">name&lt;/span>: &lt;span class="kt">varchar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;name&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">length&lt;/span>: &lt;span class="kt">255&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">29&lt;/span>&lt;span class="cl"> &lt;span class="nx">email&lt;/span>: &lt;span class="kt">varchar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;email&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">length&lt;/span>: &lt;span class="kt">255&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="kt">unique&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">30&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;created_at&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">defaultNow&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">31&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;updated_at&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">$onUpdate&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">32&lt;/span>&lt;span class="cl"> &lt;span class="p">()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">33&lt;/span>&lt;span class="cl"> &lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">34&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="c1">// projects.domain.ts
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">z&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;zod&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">uuid&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">varchar&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">timestamp&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;drizzle-orm/pg-core&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">UsersTable&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;./users.domain&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">&lt;span class="c1">// Domain Models schema
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">ProjectModelSchema&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kt">object&lt;/span>&lt;span class="p">({&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl"> &lt;span class="nx">title&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">255&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdBy&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">optional&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="nx">ProjectModel&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">infer&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">typeof&lt;/span> &lt;span class="na">ProjectModelSchema&lt;/span>&lt;span class="p">&amp;gt;;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl">&lt;span class="c1">// Database Table Definition - Drizzle ORM
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">ProjectsTable&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;projects&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">22&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;id&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">primaryKey&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">defaultRandom&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">23&lt;/span>&lt;span class="cl"> &lt;span class="nx">title&lt;/span>: &lt;span class="kt">varchar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;title&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">length&lt;/span>: &lt;span class="kt">255&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">24&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdBy&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;created_by&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">25&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">references&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="nx">UsersTable&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">id&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">26&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">27&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;created_at&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">defaultNow&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">28&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;updated_at&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">$onUpdate&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">29&lt;/span>&lt;span class="cl"> &lt;span class="p">()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">30&lt;/span>&lt;span class="cl"> &lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">31&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="c1">// tasks.domain.ts
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">z&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;zod&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">uuid&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">varchar&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">timestamp&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">pgEnum&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kr">boolean&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;drizzle-orm/pg-core&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">UsersTable&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;./users.domain&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">ProjectsTable&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s2">&amp;#34;./projects.domain&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="c1">// Domain Models schema
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">&lt;span class="kr">const&lt;/span> &lt;span class="nx">TasksPriority&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;1&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;2&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;3&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;4&amp;#34;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="kr">as&lt;/span> &lt;span class="kr">const&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">TaskModelSchema&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="kt">object&lt;/span>&lt;span class="p">({&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl"> &lt;span class="nx">title&lt;/span>: &lt;span class="kt">z&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Title is required&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">255&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Title must be less than 255 characters&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl"> &lt;span class="nx">description&lt;/span>: &lt;span class="kt">z&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">min&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Description is required&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">max&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">255&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Description must be less than 255 characters&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">22&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">optional&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">23&lt;/span>&lt;span class="cl"> &lt;span class="nx">projectId&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">24&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdBy&lt;/span>: &lt;span class="kt">z.string&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">uuid&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">25&lt;/span>&lt;span class="cl"> &lt;span class="nx">dueDate&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">optional&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">26&lt;/span>&lt;span class="cl"> &lt;span class="nx">priority&lt;/span>: &lt;span class="kt">z.enum&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">TasksPriority&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">27&lt;/span>&lt;span class="cl"> &lt;span class="nx">isCompleted&lt;/span>: &lt;span class="kt">z.boolean&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">28&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">29&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">z.date&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">optional&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">30&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">31&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">32&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">type&lt;/span> &lt;span class="nx">TaskModel&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">z&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">infer&lt;/span>&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">typeof&lt;/span> &lt;span class="na">TaskModelSchema&lt;/span>&lt;span class="p">&amp;gt;;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">33&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">34&lt;/span>&lt;span class="cl">&lt;span class="c1">// Database Table Definition - Drizzle ORM
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">35&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">36&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">TasksPriorityEnum&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">pgEnum&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;tasks_priority&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;1&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;2&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;3&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;4&amp;#34;&lt;/span>&lt;span class="p">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">37&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">38&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="kr">const&lt;/span> &lt;span class="nx">TasksTable&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">pgTable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;tasks&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">39&lt;/span>&lt;span class="cl"> &lt;span class="nx">id&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;id&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">primaryKey&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nx">defaultRandom&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">40&lt;/span>&lt;span class="cl"> &lt;span class="nx">title&lt;/span>: &lt;span class="kt">varchar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;title&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">length&lt;/span>: &lt;span class="kt">255&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">41&lt;/span>&lt;span class="cl"> &lt;span class="nx">description&lt;/span>: &lt;span class="kt">varchar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;description&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">length&lt;/span>: &lt;span class="kt">255&lt;/span> &lt;span class="p">}),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">42&lt;/span>&lt;span class="cl"> &lt;span class="nx">projectId&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;project_id&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">43&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">references&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="nx">ProjectsTable&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">id&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">44&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">45&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdBy&lt;/span>: &lt;span class="kt">uuid&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;created_by&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">46&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">references&lt;/span>&lt;span class="p">(()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="nx">UsersTable&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">id&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">47&lt;/span>&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">48&lt;/span>&lt;span class="cl"> &lt;span class="nx">dueDate&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;due_date&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">49&lt;/span>&lt;span class="cl"> &lt;span class="nx">priority&lt;/span>: &lt;span class="kt">TasksPriorityEnum&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;priority&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">50&lt;/span>&lt;span class="cl"> &lt;span class="nx">isCompleted&lt;/span>: &lt;span class="kt">boolean&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;is_completed&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="k">default&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">notNull&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">51&lt;/span>&lt;span class="cl"> &lt;span class="nx">createdAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;created_at&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">defaultNow&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">52&lt;/span>&lt;span class="cl"> &lt;span class="nx">updatedAt&lt;/span>: &lt;span class="kt">timestamp&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;updated_at&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">withTimezone&lt;/span>: &lt;span class="kt">true&lt;/span> &lt;span class="p">}).&lt;/span>&lt;span class="nx">$onUpdate&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">53&lt;/span>&lt;span class="cl"> &lt;span class="p">()&lt;/span> &lt;span class="o">=&amp;gt;&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nb">Date&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">54&lt;/span>&lt;span class="cl"> &lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">55&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+
+
+
+
+&lt;h2 id="configuration-setup">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#configuration-setup">Configuration Setup&lt;/a>
+&lt;/h2>
+&lt;p>Now, follow these steps to complete the setup:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Environment Configuration&lt;/strong>: Add your database URL to the &lt;code>.env&lt;/code> file (this is the secure way to handle sensitive data):&lt;/p>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>// .env
+
+DATABASE_URL=&amp;lt;SUPABASE_URL&amp;gt;&lt;/code>&lt;/pre>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Package.json Scripts&lt;/strong>: Add essential commands to your &lt;code>package.json&lt;/code>:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// package.json
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;scripts&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;start&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;bun run index.ts&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;db:generate&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;drizzle-kit generate&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;db:migrate&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;drizzle-kit migrate&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Drizzle Configuration&lt;/strong>: Create a &lt;code>drizzle.config.ts&lt;/code> file in the root folder and add the following code:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-ts" data-lang="ts">&lt;span class="line">&lt;span class="ln"> 1&lt;/span>&lt;span class="cl">&lt;span class="c1">// drizzle.config.ts
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 2&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 3&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="s1">&amp;#39;dotenv/config&amp;#39;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 4&lt;/span>&lt;span class="cl">&lt;span class="kr">import&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">defineConfig&lt;/span> &lt;span class="p">}&lt;/span> &lt;span class="kr">from&lt;/span> &lt;span class="s1">&amp;#39;drizzle-kit&amp;#39;&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 5&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 6&lt;/span>&lt;span class="cl">&lt;span class="kr">export&lt;/span> &lt;span class="k">default&lt;/span> &lt;span class="nx">defineConfig&lt;/span>&lt;span class="p">({&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 7&lt;/span>&lt;span class="cl"> &lt;span class="c1">// Drizzle will pick up DB schemas from here
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 8&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// and sync with Supabase
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln"> 9&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">schema&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="s1">&amp;#39;./core/domain/*.domain.ts&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">10&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">11&lt;/span>&lt;span class="cl"> &lt;span class="c1">// All future incremental DB changes will be stored here
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">12&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// representing the current state/schema of tables
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">13&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">out&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="s1">&amp;#39;./migrations&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">14&lt;/span>&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">15&lt;/span>&lt;span class="cl"> &lt;span class="c1">// Database type
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">16&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">dialect&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="s1">&amp;#39;postgresql&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">17&lt;/span>&lt;span class="cl"> &lt;span class="nx">dbCredentials&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">18&lt;/span>&lt;span class="cl"> &lt;span class="c1">// Database connection string
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">19&lt;/span>&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">url&lt;/span>: &lt;span class="kt">process.env.DATABASE_URL&lt;/span> &lt;span class="kr">as&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">20&lt;/span>&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="ln">21&lt;/span>&lt;span class="cl">&lt;span class="p">});&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Database Migration&lt;/strong>: Run these two commands in your terminal:&lt;/p>
+
+ 
+
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">bun run db:generate
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">bun run db:migrate&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;/li>
+&lt;/ol>
+&lt;p>Voila! You should now see the tables created in your Supabase project under Database → Tables.&lt;/p>
+
+
+
+
+&lt;h2 id="understanding-our-domain-layer">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#understanding-our-domain-layer">Understanding Our Domain Layer&lt;/a>
+&lt;/h2>
+&lt;p>This completes our Domain layer implementation. Before ending this blog post, let me also explain our folder structure.&lt;/p>
+&lt;p>As mentioned in the previous blog, the domain is part of our core. We&amp;rsquo;ve placed it in the &lt;code>core&lt;/code> folder, and there are other folders we created that will make more sense as we progress further in this series:&lt;/p>
+
+ 
+
+&lt;pre tabindex="0">&lt;code>├── adapters
+├── cmd
+├── core // Core of our application
+│ └── domain // Domain layer
+│ ├── projects.domain.ts
+│ ├── tasks.domain.ts
+│ └── users.domain.ts
+├── drizzle.config.ts
+├── index.ts
+├── infrastructure
+├── migrations
+├── package.json&lt;/code>&lt;/pre>
+
+
+
+
+&lt;h2 id="whats-coming-next">
+ &lt;a class="Heading-link u-clickable" href="https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-2/#whats-coming-next">What&amp;rsquo;s Coming Next&lt;/a>
+&lt;/h2>
+&lt;p>In the next part of this series, we&amp;rsquo;ll be moving outside of the core and implementing ports, services, and repositories.&lt;/p>
+&lt;p>Stay tuned for hands-on coding where theory meets reality!&lt;/p></description></item><item><title>Anatomy of Hexagonal Architecture - Part 1</title><link>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</link><pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate><guid>https://Tejas-Gosavi.github.io/blog/2025/anatomy-of-hexagonal-architecture-1/</guid><description>&lt;p>So here&amp;rsquo;s how I discovered hexagonal architecture&amp;hellip;&lt;/p>
 &lt;p>A few days ago, my senior manager was discussing the code structure of a repository, and that&amp;rsquo;s where he mentioned it. I was immediately impressed by the name &amp;ldquo;Hexagonal Architecture&amp;rdquo; and instantly became a fan of it. Later, I wanted to learn more about it, so I started researching online. There are many articles and videos available, but they were quite confusing to me at first, so I stopped searching.&lt;/p>
 &lt;p>A few days later, I was reading about clean architecture and then explored how we can transition from clean to hexagonal architecture. That&amp;rsquo;s when I gained a better understanding of it.&lt;/p>
 &lt;p>So, enough about the past—let&amp;rsquo;s focus on the present.&lt;/p>
