@@ -1,0 +1,62 @@
+baseURL: https://Tejas-Gosavi.github.io
+title: Tejas Gosavi
+description: "Software engineer/developer sharing insights on distributed systems, Javascript, Go and tech"
+languageCode: en-US
+theme: hugo-flex
+enableEmoji: true
+
+params:
+  color: teal           # Any color in CSS syntax
+  width: 42rem          # Any length in CSS syntax / leave empty to span page
+  divider: \2500\2500   # Any string in CSS syntax / leave empty for no divider
+  favicon: false        # Set to true to add a link to the favicon.ico
+  noClasses: &nc false  # Set to true to use inline CSS for syntax highlighting
+  katex: 0.16.11        # KaTeX version / leave empty to use the latest version
+  headingoffset: 0      # Change heading levels when rendering markdown
+  linkicons: false      # Set to hover or true to add a link icon to headings
+  summaries: true      # Set to true to show summaries of posts on homepage
+  schema: false         # Set to true to add Schema.org metadata
+  opengraph: true      # Set to true to add Open Graph metadata
+  twittercards: false   # Set to true to add Twitter Cards metadata
+  utterances:
+    repo:               # Set to Utterances repo URL to add Utterances comments
+    issueterm:          # Leave empty for the default blog post to issue mapping
+    theme:              # Leave empty to use the adaptive Utterances dark theme
+  netlify:
+    honeypot: false     # Set to true to add honeypot field in contact form
+    recaptcha: false    # Set to true to add recaptcha challenge in contact form
+  css:                # Uncomment to add custom CSS from the assets directory
+    - css/base.css
+
+markup:
+  highlight:
+    noClasses: *nc      # Set to same value as params.noClasses
+    
+  goldmark:
+    extensions:
+      passthrough:
+        enable: false   # Set to true to render math in LaTeX notation globally
+        delimiters:
+          block:
+            - ['\[', '\]']
+            - ['$$', '$$']
+          inline:
+            - ['\(', '\)']
+    renderer:
+      unsafe: true
+
+menu:
+  main:
+    - name: About
+      pageRef: /about
+      weight: 1
+    - name: Experience
+      pageRef: /experience
+      weight: 2
+    - name: Blog
+      pageRef: /blog
+      weight: 3
+
+disableKinds:
+  - taxonomy
+  - term

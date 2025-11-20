@@ -1,0 +1,30 @@
+# Hugo build output
+/public/
+/resources/_gen/
+/hugo_stats.json
+
+# Local server cache
+/.hugo_build.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / JS dependencies
+node_modules/
+package-lock.json
+yarn.lock
+.pnpm-store/
+
+# Log files
+*.log
+npm-debug.log*
+
+# Deployment tools (optional)
+/dist/

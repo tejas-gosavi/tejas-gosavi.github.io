@@ -1,0 +1,24 @@
+{{ define "main" }}
+
+  {{ $context := dict "page" . "level" 1 "isdateshown" false }}
+  {{ partial "heading.html" $context }}
+
+  {{ .Content }}
+
+  {{ $length := len .Pages }}
+  {{ if gt $length 0 }}
+    <section class="Blog-list">
+      {{ range .Pages.GroupByPublishDate "2006" }}
+        <h2>{{ .Key }}</h2>
+        <ul>
+          {{ range .Pages }}
+            <li>
+              {{ time.Format "2006-01-02" .PublishDate }} – <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            </li>
+          {{ end }}
+        </ul>
+      {{ end }}
+    </section>
+  {{ end }}
+
+{{ end }}

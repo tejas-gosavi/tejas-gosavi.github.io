@@ -1,0 +1,9 @@
+This website uses the hugo-flex theme:
+https://github.com/de-souza/hugo-flex
+
+The hugo-flex theme is licensed under the Apache License, Version 2.0.
+
+Modifications made:
+- Footer layout customized
+- Removed "tags" taxonomy
+- Customized theme parameters in config

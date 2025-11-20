@@ -1,0 +1,35 @@
+img[src="/images/profile.jpg"] {
+    max-width: 170px;
+    width: 170px;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 10%;
+    display: block;
+    margin: 1rem 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+.Footer a,
+article .Heading .Heading-link,
+.Blog-list a,
+.Contact-link,
+.Error404 a,
+.Reference-link {
+    color: teal;
+}
