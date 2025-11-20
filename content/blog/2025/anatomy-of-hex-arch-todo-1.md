@@ -14,7 +14,7 @@ A few days ago, my senior manager was discussing the code structure of a reposit
 
 A few days later, I was reading about clean architecture and then explored how we can transition from clean to hexagonal architecture. That's when I gained a better understanding of it.
 
-So, enough about the past—let's focus on the present.
+So, enough about the past, let's focus on the present.
 
 ## What This Series Will Cover
 
@@ -35,7 +35,7 @@ The core principle is to isolate the business logic from external concerns by cr
 
 ![Hexagonal Architecture](/images/blog/hexagonal-architecture.png)
 
-As you can see in the above diagram, this is the main design. Looks complex, right? Bear with me—you'll understand it step by step.
+As you can see in the above diagram, this is the main design. Looks complex, right? Bear with me, you'll understand it step by step.
 
 ### The Two Sides of the Hexagon
 
@@ -104,17 +104,6 @@ Let's walk through a concrete example to solidify our understanding. Imagine a f
 3. UserService returns data through UserServicePort
 2. HTTP Adapter formats response (JSON)
 1. Frontend receives HTTP response with user data
-```
-
-### Visual Flow
-```
-HTTP Request → Primary Adapter → Primary Port → Service 
-                                                    ↓
-HTTP Response ← Primary Adapter ← Primary Port ← Service
-                                                    ↓
-                              Secondary Port → Secondary Adapter → Database
-                                     ↑                                ↓
-                              Secondary Port ← Secondary Adapter ← Database
 ```
 
 ## Key Benefits of This Approach
