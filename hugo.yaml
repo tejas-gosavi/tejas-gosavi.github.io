@@ -7,7 +7,7 @@ enableEmoji: true
 
 params:
   color: teal           # Any color in CSS syntax
-  width: 42rem          # Any length in CSS syntax / leave empty to span page
+  width: 44rem          # Any length in CSS syntax / leave empty to span page
   divider: \2500\2500   # Any string in CSS syntax / leave empty for no divider
   favicon: false        # Set to true to add a link to the favicon.ico
   noClasses: &nc false  # Set to true to use inline CSS for syntax highlighting

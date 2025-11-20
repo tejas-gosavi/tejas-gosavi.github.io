@@ -12,12 +12,12 @@ I have been working with Distributed systems, microservices and Web Dev for the 
 
 ## Technologies I Work With :computer:
 
-- **Programming Languages**: JavaScript/TypeScript, Golang, Python, C++, SQL, HTML, CSS, C.
-- **Frameworks/Libraries**: Node.js, React, Next.js, Django, Angular, Tailwind.
-- **Databases**: PostgreSQL, MongoDB, SQLite.
-- **Cloud Services**: AWS Lambda, Queue, Step Functions, S3, EventBridge, DynamoDB, AWS CDK.
-- **Tools**: Git, Linux, Docker, Nginx, Hugo, Drizzle ORM, ChatGPT, Claude.
-- **CS paradigms**: Distributed Systems, Microservices, Gen AI, Containerization, Functional programming, Machine learning, OOP, DBMS.
+- **Programming Languages**: JavaScript/TypeScript, Python, Go, C++, SQL, HTML, CSS.
+- **Frameworks/Libraries**: Node.js, React, Next.js, Angular, LangChain, LangGraph, Tailwind, BullMQ.
+- **Databases**: PostgreSQL, MongoDB, QudrantDB.
+- **Tools/Services**: Docker, Nginx, Git, Linux, AWS Lambda/Queue/S3/EventBridge/Step Functions.
+- **CS paradigms**: Distributed Systems, Microservices, REST/Event-Driven Architecture, Containerization,
+Functional programming, OOP.
 
 ## Apart from work :smile:
 
@@ -28,4 +28,4 @@ I have been working with Distributed systems, microservices and Web Dev for the 
 
 I'm always open to discussing new tech/tools or normal chit-chat.
 
-<a class="Contact-link" href="mailto:tejasgosavi555@gmail.com">Email</a> - <a class="Contact-link" href="https://www.linkedin.com/in/tejasgosavi555/">LinkedIn</a> - <a class="Contact-link" href="https://x.com/Tejas_Gosavi_">X(Twitter)</a> - <a class="Contact-link" href="https://drive.google.com/file/d/1EujuwteHXVVRjTxxqi-EL_XLZXkldXtz/view">My Resume</a>
+<a class="Contact-link" href="mailto:tejasgosavi555@gmail.com">Email</a> - <a class="Contact-link" href="https://www.linkedin.com/in/tejasgosavi555/">LinkedIn</a> - <a class="Contact-link" href="https://drive.google.com/file/d/1EujuwteHXVVRjTxxqi-EL_XLZXkldXtz/view">My Resume</a>
