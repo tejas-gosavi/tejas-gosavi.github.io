@@ -60,3 +60,7 @@ menu:
 disableKinds:
   - taxonomy
   - term
+
+caches:
+  images:
+    dir: :cacheDir/images
