@@ -64,37 +64,37 @@ export interface UsersRepoPort {
 Run the following commands to create the initial files:
 
 ```bash
-/mytodoist> mkdir -p adapters/secondary/persistence/postgresql/users
-/mytodoist> touch adapters/secondary/persistence/postgresql/users/index.ts
+/mytodoist> mkdir -p adapters/secondary/persistence/sqlite/users
+/mytodoist> touch adapters/secondary/persistence/sqlite/users/index.ts
 ```
 
 That's quite a few folders! Let me explain the folder structure:
 
 - `adapters/secondary` - As mentioned in the first blog, **Repositories** are secondary adapters
 - `adapters/secondary/persistence` - We are storing/persisting data in a database
-- `adapters/secondary/persistence/postgresql` - The name of the database where we're storing data
+- `adapters/secondary/persistence/sqlite` - The name of the database where we're storing data
 
 Inside `adapters/secondary`, we can also have folders/files according to our requirements:
 - `/queue` for pushing data to queues
 - `/cache` for storing data in cache
 - etc.
 
-Below is the implementation of the users repository, which interacts with a PostgreSQL database. It takes a Drizzle client as a dependency to interact with the database and returns an object with various methods that follow the structure of **UsersRepoPort**.
+Below is the implementation of the users repository, which interacts with a SQLite database. It takes a Drizzle client as a dependency to interact with the database and returns an object with various methods that follow the structure of **UsersRepoPort**.
 
 ```ts
-// adapters/secondary/persistence/postgresql/users/index.ts
+// adapters/secondary/persistence/sqlite/users/index.ts
 
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import type { UsersRepoPort } from "../../../../../core/ports/users.ports";
 import { UsersTable } from "../../../../../core/domain/users.domain";
 import { eq } from "drizzle-orm";
 
-const REPO_NAME = "Postgresql-UsersRepo";
+const REPO_NAME = "SQLite-UsersRepo";
 
 export const usersRepo = ({
   drizzleClient,
 }: {
-  drizzleClient: PostgresJsDatabase;
+  drizzleClient: LibSQLDatabase;
 }): UsersRepoPort => {
   return {
     create: async (user) => {
@@ -175,9 +175,7 @@ export const usersRepo = ({
 
     delete: async (id) => {
       try {
-        await drizzleClient
-          .delete(UsersTable)
-          .where(eq(UsersTable.id, id));
+        await drizzleClient.delete(UsersTable).where(eq(UsersTable.id, id));
       } catch (error: Error | any) {
         throw new Error(`Error in ${REPO_NAME}:delete:${error.message}`);
       }
@@ -208,7 +206,7 @@ Run the following command to create the initial file:
 
 ```bash
 /mytodoist> mkdir core/services
-/mytodoist> touch core/services/users.service.ts 
+/mytodoist> touch core/services/users-service.ts 
 ```
 
 Similar to **Repositories**, we need to implement an interface for **Services**. We'll add it to the same file where we defined the **Repository** interfaces:
@@ -217,6 +215,10 @@ Similar to **Repositories**, we need to implement an interface for **Services**.
 // users.ports.ts
 
 // ...existing code...
+
+// Service Port Interface
+// This interface defines the methods that the UsersService will implement.
+// This will act as methods which we can perform for user-related operations in the application layer.
 
 export interface UsersServicePort {
   registerUser(user: UserModel): Promise<UserModel | null>;
@@ -234,7 +236,7 @@ export interface UsersServicePort {
 Now let's implement the service based on the interface above:
 
 ```ts
-// core/services/users.service.ts
+// core/services/users-service.ts
 
 import type { UsersRepoPort, UsersServicePort } from "../ports/users.ports";
 
@@ -330,7 +332,7 @@ Our folder structure now looks like this:
 ├── adapters
 │   └── secondary
 │       └── persistence
-│           └── postgresql
+│           └── sqlite
 │               └── users
 │                   └── index.ts
 ├── cmd
@@ -342,7 +344,7 @@ Our folder structure now looks like this:
 │   ├── ports                   // Port definitions
 │   │   └── users.ports.ts
 │   └── services                // Business logic layer
-│       └── users.service.ts
+│       └── users-service.ts
 ├── drizzle.config.ts
 ├── index.ts
 ├── infrastructure

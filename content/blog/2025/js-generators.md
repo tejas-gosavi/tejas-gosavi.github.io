@@ -71,7 +71,7 @@ iAmInfinity.next() // {value: 4, done: false}
 // ... continues indefinitely
 ```
 
-So, this is the iterator protocol. Not exciting, right? Same as functions and closures? But bear with me for the next 10 minutes—you'll understand what I'm getting at.
+So, this is the iterator protocol. Not exciting, right? Same as functions and closures? But bear with me for the next 10 minutes you'll understand what I'm getting at.
 
 ### What are Iterables?
 
@@ -98,7 +98,7 @@ const getUsers = {
 
 Now you might ask: what's the difference? Just some weird syntax change? But wait a minute...
 
-You know what `for...of` takes as input to loop over? That's right—an iterable!
+You know what `for...of` takes as input to loop over? That's right an iterable!
 
 So you can do the following with a custom-defined iterable:
 
@@ -186,7 +186,7 @@ This might look like a lot to digest, but let me explain how it works step by st
 3. **Process in batches**: We use a loop to fetch users with `limit` and `offset`, and after fetching every batch, we `yield` that batch
 4. **Pause and resume**: The `yield` statement is inside a `for` loop, which means this function continues working until all batches are completed (all users are fetched)
 
-Here's the beautiful part: we pause execution after fetching every batch and give that batch to a function for processing only that particular batch. Once processing is finished, we restart execution—the `batchNumber` is incremented and we fetch a new batch based on the new `limit` and `offset`.
+Here's the beautiful part: we pause execution after fetching every batch and give that batch to a function for processing only that particular batch. Once processing is finished, we restart execution the `batchNumber` is incremented and we fetch a new batch based on the new `limit` and `offset`.
 
 Also, this generator function is generic, meaning we can use it in multiple use cases where we need to fetch users in batches and perform some processing on them.
 

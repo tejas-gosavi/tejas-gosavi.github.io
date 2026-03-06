@@ -28,31 +28,22 @@ Let's define the properties of these entities:
 
 ```
 User -
-    id -> UUID                       // Will act as userId
+    id -> integer                    // Will act as userId
     name -> string                   // name of user
     email -> string                  // email of user
-    createdAt -> Date                // user creation date-time
-    updatedAt -> Date                // user updation date-time
 
 Project -
-    id -> UUID                       // Will act as projectId          
+    id -> integer                    // Will act as projectId          
     title -> string                  // title of project
-    color -> string                  // color associated with that project, will act as identifier
-    createdBy -> UUID                // Creator of project
-    createdAt -> Date                // project creation date-time
-    updatedAt -> Date                // project updation date-time
+    createdBy -> integer             // Creator of project
 
 Task -
-    id -> UUID                       // Will act as taskId
+    id -> integer                    // Will act as taskId
     title -> string                  // title of task
     description -> string            // description of task
-    projectId -> UUID                // projectId under which this task is created
-    createdBy -> UUID                // Owner/Creator of task
-    dueDate -> Date?                 // Optional property, due date by which this task should be completed
-    priority -> 1 | 2 | 3 | 4        // Priority of the task, lower number = higher priority
+    projectId -> integer             // projectId under which this task is created
+    createdBy -> integer             // Owner/Creator of task
     isCompleted -> boolean           // is given task completed or not
-    createdAt -> Date                // task creation date-time
-    updatedAt -> Date                // task updation date-time
 ```
 
 Great! Our entity definition is complete. Now we need to translate this logic into readable code.
@@ -61,7 +52,7 @@ Before we start coding, let's prepare our arsenal - tools, project initializatio
 
 ## Tools
 - <a class="Reference-link" href="https://bun.sh/">Bun</a> - will be our runtime
-- <a class="Reference-link" href="https://supabase.com/">Supabase</a> - will be our database
+- <a class="Reference-link" href="https://sqlite.org/">SQLite</a> - will be our database
 - <a class="Reference-link" href="https://orm.drizzle.team/">Drizzle</a> - will be our ORM (Object Relational Mapping) tool
 - <a class="Reference-link" href="https://zod.dev/">Zod</a> - will be our validator
 
@@ -75,7 +66,7 @@ bun init mytodoist
 cd mytodoist
 
 # Install initial packages
-bun add drizzle-orm postgres dotenv zod
+bun add drizzle-orm @libsql/client dotenv zod
 bun add -D drizzle-kit tsx
 
 # create required files/folders
@@ -93,13 +84,13 @@ Now we'll define our domain entities:
 ```ts {linenos=inline}
 // users.domain.ts
 
-import { pgTable, varchar, uuid, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import z from "zod";
 
 // Domain Model
 
 export const UserModelSchema = z.object({
-  id: z.string().uuid(),
+  id: z.int(),
   name: z
     .string()
     .min(1, "Name is required")
@@ -108,22 +99,16 @@ export const UserModelSchema = z.object({
     .string()
     .email("Invalid email format")
     .max(255, "Email must be less than 255 characters"),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
 });
 
 export type UserModel = z.infer<typeof UserModelSchema>;
 
 // Database Table Definition
 
-export const UsersTable = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-    () => new Date()
-  ),
+export const UsersTable = sqliteTable("users", {
+  id: integer("id").primaryKey(),
+  name: text("name", { length: 255 }).notNull(),
+  email: text("email", { length: 255 }).notNull().unique(),
 });
 ```
 
@@ -131,33 +116,30 @@ export const UsersTable = pgTable("users", {
 // projects.domain.ts
 
 import { z } from "zod";
-import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { UsersTable } from "./users.domain";
 
 // Domain Models schema
 
 export const ProjectModelSchema = z.object({
-  id: z.string().uuid(),
-  title: z.string().min(1).max(255),
-  createdBy: z.string().uuid(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  id: z.int(),
+  title: z
+    .string()
+    .min(1, "Project Title is required")
+    .max(255, "Project Title must be less than 255 characters"),
+  createdBy: z.int(),
 });
 
 export type ProjectModel = z.infer<typeof ProjectModelSchema>;
 
 // Database Table Definition - Drizzle ORM
 
-export const ProjectsTable = pgTable("projects", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: varchar("title", { length: 255 }).notNull(),
-  createdBy: uuid("created_by")
+export const ProjectsTable = sqliteTable("projects", {
+  id: integer("id").primaryKey(),
+  title: text("title", { length: 255 }).notNull(),
+  createdBy: integer("created_by")
     .references(() => UsersTable.id)
     .notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-    () => new Date()
-  ),
 });
 ```
 
@@ -165,56 +147,45 @@ export const ProjectsTable = pgTable("projects", {
 // tasks.domain.ts
 
 import { z } from "zod";
-import { pgTable, uuid, varchar, timestamp, pgEnum, boolean } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { UsersTable } from "./users.domain";
 import { ProjectsTable } from "./projects.domain";
+import { sql } from "drizzle-orm";
 
 // Domain Models schema
 
-const TasksPriority = ["1", "2", "3", "4"] as const;
-
 export const TaskModelSchema = z.object({
-  id: z.string().uuid(),
-  title: z
+  id: z.int(),
+  name: z
     .string()
-    .min(1, "Title is required")
-    .max(255, "Title must be less than 255 characters"),
+    .min(1, "Task Name is required")
+    .max(255, "Task Name must be less than 255 characters"),
   description: z
     .string()
     .min(1, "Description is required")
     .max(255, "Description must be less than 255 characters")
     .optional(),
-  projectId: z.string().uuid(),
-  createdBy: z.string().uuid(),
-  dueDate: z.date().optional(),
-  priority: z.enum(TasksPriority),
+  projectId: z.int(),
+  createdBy: z.int(),
   isCompleted: z.boolean(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
 });
 
 export type TaskModel = z.infer<typeof TaskModelSchema>;
 
 // Database Table Definition - Drizzle ORM
 
-export const TasksPriorityEnum = pgEnum("tasks_priority", ["1", "2", "3", "4"]);
-
-export const TasksTable = pgTable("tasks", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: varchar("description", { length: 255 }),
-  projectId: uuid("project_id")
+export const TasksTable = sqliteTable("tasks", {
+  id: integer("id").primaryKey(),
+  name: text("name", { length: 255 }).notNull(),
+  description: text("description", { length: 255 }),
+  projectId: integer("project_id")
     .references(() => ProjectsTable.id)
     .notNull(),
-  createdBy: uuid("created_by")
+  createdBy: integer("created_by")
     .references(() => UsersTable.id)
     .notNull(),
-  dueDate: timestamp("due_date", { withTimezone: true }),
-  priority: TasksPriorityEnum("priority").notNull(),
-  isCompleted: boolean("is_completed").default(false).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-    () => new Date()
+  isCompleted: integer("is_completed", { mode: "boolean" }).default(
+    sql`(abs(0))`
   ),
 });
 ```
@@ -227,7 +198,7 @@ Now, follow these steps to complete the setup:
     ```
     // .env
 
-    DATABASE_URL=<SUPABASE_URL>
+    DB_FILE_NAME=file:local.db
     ```
 
 2. **Package.json Scripts**: Add essential commands to your `package.json`:
@@ -247,24 +218,24 @@ Now, follow these steps to complete the setup:
     ```ts {linenos=inline}
     // drizzle.config.ts
 
-    import 'dotenv/config';
-    import { defineConfig } from 'drizzle-kit';
+    import "dotenv/config";
+    import { defineConfig } from "drizzle-kit";
 
     export default defineConfig({
-        // Drizzle will pick up DB schemas from here
-        // and sync with Supabase
-        schema: './core/domain/*.domain.ts',
+      // Drizzle will pick up DB schemas from here
+      // and sync with Local SQLite DB
+      schema: "./core/domain/*.domain.ts",
 
-        // All future incremental DB changes will be stored here
-        // representing the current state/schema of tables
-        out: './migrations',
+      // All future incremental DB changes will be stored here
+      // representing the current state/schema of tables
+      out: "./migrations",
 
-        // Database type
-        dialect: 'postgresql',
-        dbCredentials: {
-            // Database connection string
-            url: process.env.DATABASE_URL as string,
-        },
+      // Database type
+      dialect: "sqlite",
+      dbCredentials: {
+        // Database connection string
+        url: process.env.DB_FILE_NAME!,
+      },
     });
     ```
 
@@ -274,7 +245,7 @@ Now, follow these steps to complete the setup:
     bun run db:migrate
     ```
 
-Voila! You should now see the tables created in your Supabase project under Database → Tables.
+Voila! Tables are created in your local SQLite database.
 
 ## Understanding Our Domain Layer
 
